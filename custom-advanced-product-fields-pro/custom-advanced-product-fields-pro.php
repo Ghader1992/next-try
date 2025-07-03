@@ -44,9 +44,12 @@ define( 'CAPF_PRO_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
  * This action is documented in includes/class-capf-activator.php (if we create one, or handle here)
  */
 function activate_capf_pro() {
-	// Placeholder for activation tasks, e.g., creating custom tables, setting default options.
-	// For now, we can ensure WooCommerce is active.
+	// Ensure WooCommerce is active.
 	if ( ! class_exists( 'WooCommerce' ) ) {
+		// Make sure is_plugin_active function is available
+		if ( ! function_exists( 'is_plugin_active' ) ) {
+			include_once ABSPATH . 'wp-admin/includes/plugin.php';
+		}
 		deactivate_plugins( plugin_basename( __FILE__ ) );
 		wp_die(
 			esc_html__( 'Custom Advanced Product Fields PRO requires WooCommerce to be installed and active.', 'capf-pro' ),
@@ -54,6 +57,10 @@ function activate_capf_pro() {
 			array( 'back_link' => true )
 		);
 	}
+
+	// Require the installer class and create tables.
+	require_once CAPF_PRO_PLUGIN_DIR . 'includes/class-capf-install.php';
+	CAPF_Install::create_tables();
 }
 
 /**
@@ -101,6 +108,7 @@ function run_capf_pro() {
 	$loader->add_action( 'admin_menu', $plugin_admin, 'add_admin_menu' );
 	$loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 	$loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
+	$loader->add_action( 'wp_ajax_capf_create_field_group', $plugin_admin, 'ajax_create_field_group' ); // AJAX hook for creating group
 
 	// Public hooks (example, will be properly defined later)
 	// $plugin_public = new CAPF_Public( 'capf-pro', CAPF_PRO_VERSION );
