@@ -112,12 +112,15 @@ function run_capf_pro() {
 }
 
 // Check if WooCommerce is active before running the plugin
-if ( class_exists( 'WooCommerce' ) ) {
-	run_capf_pro();
-} else {
-	// Optionally, add an admin notice if WooCommerce is not active after initial activation check
-	add_action( 'admin_notices', 'capf_pro_woocommerce_missing_notice' );
+function capf_pro_init() {
+	if ( class_exists( 'WooCommerce' ) ) {
+		run_capf_pro();
+	} else {
+		// Add an admin notice if WooCommerce is not active
+		add_action( 'admin_notices', 'capf_pro_woocommerce_missing_notice' );
+	}
 }
+add_action( 'plugins_loaded', 'capf_pro_init' );
 
 /**
  * Display an admin notice if WooCommerce is not active.
